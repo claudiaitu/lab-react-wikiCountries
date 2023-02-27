@@ -1,66 +1,84 @@
-import { useState, useEffect } from "react";
-import { useParams, Link } from 'react-router-dom';
-import countries from '../countries.json';
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 
-function  CountryDetails (props) {
-    const { countryName } = useParams();
+const CountryDetails = ({ countries }) => {
 
-    const [foundCountries, setFoundCountries] = useState(null);
+    const [ thisCountry, setThisCountry ] = useState(null)
 
+    const { countryId } = useParams()
 
-<div className="col-7">
-<h1>France</h1>
-<table className="table">
-  <thead></thead>
-  <tbody>
-    <tr>
-      <td style="width: 30%">Capital</td>
-      <td>Paris</td>
-    </tr>
-    <tr>
-      <td>Area</td>
-      <td>
-        551695 km
-        <sup>2</sup>
-      </td>
-    </tr>
-    <tr>
-      <td>Borders</td>
-      <td>
-        <ul>
-          <li><a href="/AND">Andorra</a></li>
-          <li><a href="/BEL">Belgium</a></li>
-          <li><a href="/DEU">Germany</a></li>
-          <li><a href="/ITA">Italy</a></li>
-          <li><a href="/LUX">Luxembourg</a></li>
-          <li><a href="/MCO">Monaco</a></li>
-          <li><a href="/ESP">Spain</a></li>
-          <li><a href="/CHE">Switzerland</a></li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-    return (
-        <div>
-          <h1>Country Details</h1>
-          {!foundCountries && <h3>Country not found!</h3>}
-    
-          {foundCountries && (
-            <>
-              <h2>{foundCountries.name}</h2>
-              <h3> {foundCountries.alpha3Code}</h3>
-              <Link to="/CountryList">Back</Link>
-            </>
-          )}
-          
-        </div>
-      )
+    const findCountry = (code) => {
+        return countries.find((country) => country.alpha3Code === code)
     }
 
 
+    const getPhoto = (code) => {
+
+        return `https://flagpedia.net/data/flags/icon/72x54/${code.toLowerCase()}.png`
+    }
 
 
-export default CountryDetails;
+    useEffect(() => {
+
+        setThisCountry(findCountry(countryId))
+
+    }, [countryId])
+
+    return (
+
+        <div className="col-7">
+
+        {
+
+            thisCountry ? 
+
+                <>
+                    <img src={getPhoto(thisCountry.alpha2Code.toLowerCase())}  alt='country' />     
+                    <h1>{thisCountry.name.common}</h1>
+                    <table className="table">
+                        <tbody>
+                            <tr>
+                            <td style={{width: '30%'}}>Capital</td>
+                            <td>{thisCountry.capital[0]}</td>
+                            </tr>
+                            <tr>
+                            <td>Area</td>
+                            <td>
+                                {thisCountry.area} km
+                                <sup>2</sup>
+                            </td>
+                            </tr>
+                            <tr>
+                            <td>Borders</td>
+                            <td>
+                                {thisCountry.borders.length ? 
+                                <ul>
+
+                                    {
+                                        thisCountry.borders.map((border) => {
+                                            return <li key={border}><Link className="list-group-item list-group-item-action" to={`/${border}`}>{findCountry(border).name.common}</Link></li>
+                                        })                                    
+
+                                    }
+
+                                </ul>
+
+                                : <h4>There are no bordering countries</h4>
+                                }
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </>
+
+
+            : <h4>Loading...</h4>
+
+        }
+
+                </div>
+    )
+}
+
+export default CountryDetails
